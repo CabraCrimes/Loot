@@ -1,0 +1,53 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model User {
+  id Int @id @default(autoincrement())
+  email String @unique
+  name String?
+  games Game[] @relation("UserGames")
+  favorites Favorite[]
+}
+
+model Game {
+  id Int @id @default(autoincrement())
+  title String
+  storeID Int
+  currentPrice Float
+  lastUpdate DateTime
+  imageUrl    String 
+  users User[] @relation("UserGames")
+  histories History[]
+  favorites Favorite[]
+}
+
+model Favorite{
+  id Int @id @default(autoincrement())
+  userId Int
+  gameId Int
+  user User @relation(fields: [userId], references: [id])
+  game Game @relation(fields: [gameId], references: [id])
+  
+  @@unique([userId, gameId]) // A user can favorite a game only once
+}
+
+model History{
+  id Int @id @default(autoincrement())
+  price Float
+  timestamp DateTime @default(now())
+  gameId Int
+  game Game @relation(fields: [gameId], references: [id])
+}
